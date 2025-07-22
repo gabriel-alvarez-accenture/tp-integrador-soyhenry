@@ -1,0 +1,15 @@
+Preparar y transformar los datos)
+    Identificar columnas con datos semi-estructurados.
+    Aplicar transformaciones para convertir esas columnas a un formato estructurado adecuado.
+
+Explorar los datos)
+    Realizar queries en SQL para examinar los datos y detectar posibles inconsistencias.
+    Implementar un análisis exploratorio de datos utilizando un ORM en Python (por ejemplo, SQLAlchemy o Django ORM).
+
+Identificar estructura y relaciones)
+    Determinar atributos clave para responder preguntas de negocio.
+    Identificar llaves primarias, foráneas y otros atributos relevantes.
+
+Evaluar la calidad de los datos)
+    Detectar problemas de calidad de datos (valores faltantes, duplicados, inconsistencias, etc.).
+    Documentar las inconsistencias encontradas y posibles soluciones.
