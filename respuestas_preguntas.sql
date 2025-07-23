@@ -1,0 +1,334 @@
+-- ===================================== VENTAS =====================================
+-- 1) ¿Cuáles son los productos más vendidos por volumen?
+	select 
+		prod.descripcion, 
+		sum(detord.cantidad) as cant_unidades_vendidas
+	from 
+		public.detalleordenes detord
+	inner join 
+		public.ordenes ord on detord.ordenid = ord.ordenid and ord.estado in ('Completado','Enviado')
+	inner join 
+		public.productos prod on detord.productoid = prod.productoid
+	group by 
+		prod.descripcion
+	order by 
+		cant_unidades_vendidas desc
+	limit 5;
+
+
+
+-- 2) ¿Cuál es el ticket promedio por orden?
+	-- Opcion 1:
+	SELECT 
+		avg(total)
+	FROM 
+		public.ordenes;
+
+	-- Opcion 2:
+	SELECT 
+		AVG(cantidad * preciounitario) 
+	FROM 
+		public.detalleordenes;
+
+
+
+-- 3) ¿Cuáles son las categorías con mayor número de productos vendidos?
+	select 
+		cat.nombre,
+		sum(c.cant_vendida) as cant_vendida
+	from 
+		public.productos prod
+	inner join 
+		public.categorias cat	on prod.categoriaid = cat.categoriaid
+	inner join 
+		(select 
+			detord.productoid,
+			detord.cantidad as cant_vendida
+		from
+			public.detalleordenes detord
+		inner join
+			public.ordenes ord on detord.ordenid = ord.ordenid and ord.estado in ('Completado','Enviado')
+		) c on prod.productoid = c.productoid
+	group by 
+		cat.nombre
+	order by 
+		cant_vendida desc
+	limit 5;
+
+
+
+-- 4) ¿Qué día de la semana se generan más ventas?
+	SELECT 
+		CASE TRIM(TO_CHAR(FechaOrden, 'Day'))
+			WHEN 'Sunday' 		THEN 'Domingo'
+			WHEN 'Monday' 		THEN 'Lunes'
+			WHEN 'Tuesday' 		THEN 'Martes'
+			WHEN 'Wednesday' 	THEN 'Miércoles'
+			WHEN 'Thursday' 	THEN 'Jueves'
+			WHEN 'Friday' 		THEN 'Viernes'
+			WHEN 'Saturday' 	THEN 'Sábado'
+		END AS dia_semana,
+		COUNT(*) AS cantidad_ordenes
+	FROM 
+		public.Ordenes
+	GROUP BY 
+		dia_semana
+	ORDER BY 
+		cantidad_ordenes DESC;
+
+
+
+-- 5) ¿Cuántas órdenes se generan cada mes y cuál es su variación?
+	WITH ordenes_mensuales AS (
+		SELECT 
+			DATE_TRUNC('month', FechaOrden) AS mes, -- se toma el 1er dia del mes para representarlo
+			COUNT(*) AS cant_ordenes
+		FROM 
+			public.ordenes
+		GROUP BY 
+			DATE_TRUNC('month', FechaOrden)
+	),
+	variacion AS (
+		SELECT 
+			mes,
+			cant_ordenes,
+			LAG(cant_ordenes) OVER (ORDER BY mes) AS cant_ordenes_mes_anterior
+		FROM 
+			ordenes_mensuales
+	)
+	SELECT 
+		mes,
+		cant_ordenes,
+		ROUND(
+		CASE 
+			WHEN cant_ordenes_mes_anterior IS NULL THEN 0
+			ELSE ((cant_ordenes - cant_ordenes_mes_anterior) * 100.0 / cant_ordenes_mes_anterior)
+		END, 2
+		) AS variacion_porcentual
+	FROM 
+		variacion
+	ORDER BY 
+		mes asc;
+-- ===================================== PAGOS Y TRANSACCIONES =====================================
+-- 1) ¿Cuáles son los métodos de pago más utilizados?
+	select 
+		metpago.nombre,
+		metpago.descripcion,
+		count(*) cant_usos
+	from 
+		public.ordenesMetodosPago ord_metpago
+	inner join
+		public.metodosPago metpago on ord_metpago.metodopagoid = metpago.metodopagoid
+	group by 
+		metpago.nombre,
+		metpago.descripcion
+	order by 
+		cant_usos desc
+	limit 5;
+
+
+
+-- 2) ¿Cuál es el monto promedio pagado por método de pago?
+	SELECT 
+		metpago.nombre, 
+		ROUND(AVG(hist_pag.monto), 2) AS monto_promedio
+	FROM 
+		public.historialpagos hist_pag
+	INNER JOIN
+		public.metodosPago metpago ON hist_pag.metodopagoid = metpago.metodopagoid
+	WHERE 
+		hist_pag.estadopago = 'Pagado'
+	GROUP BY 
+		metpago.nombre;
+
+
+
+-- 3) ¿Cuántas órdenes se pagaron usando más de un método de pago?
+	SELECT 
+		ordenid,
+		COUNT(DISTINCT metodopagoid) AS cant_metodos_pago
+	FROM 
+		public.HistorialPagos
+	WHERE
+		estadopago = 'Pagado'
+	GROUP BY 
+		ordenid
+	HAVING
+		COUNT(DISTINCT metodopagoid) > 1
+
+
+
+-- 4) ¿Cuántos pagos están en estado 'Procesando' o 'Fallido'?
+	SELECT 
+		count(distinct PagoID)
+	FROM 
+		public.HistorialPagos
+	WHERE
+		EstadoPago in ('Procesando','Fallido')
+
+
+
+-- 5) ¿Cuál es el monto total recaudado por mes?
+	SELECT 
+		DATE_TRUNC('month', FechaPago) AS Mes,
+		SUM(Monto) AS MontoTotal
+	FROM 
+		public.historialPagos
+	WHERE 
+		EstadoPago = 'Pagado'
+	GROUP BY 
+		DATE_TRUNC('month', FechaPago)
+-- ===================================== USUARIOS =====================================
+-- 1) ¿Cuántos usuarios se registran por mes?
+	SELECT 
+		DATE_TRUNC('month', FechaRegistro) AS Mes,
+		COUNT(*) AS CantidadUsuarios
+	FROM 
+		public.usuarios
+	GROUP BY 
+		DATE_TRUNC('month', FechaRegistro);
+
+
+
+-- 2) ¿Cuántos usuarios han realizado más de una orden?
+	SELECT 
+		UsuarioID,
+		COUNT(*) AS cant_ordenes
+	FROM 
+		public.ordenes
+	GROUP BY 
+		UsuarioID
+	HAVING 
+		COUNT(*) > 1;
+
+
+
+-- 3) ¿Cuántos usuarios registrados no han hecho ninguna compra?
+	SELECT 
+		COUNT(distinct UsuarioID)
+	FROM 
+		public.usuarios
+	WHERE
+		UsuarioID NOT IN (SELECT UsuarioID FROM public.ordenes WHERE estado = 'Completado')
+
+
+
+-- 4) ¿Qué usuarios han gastado más en total?
+	SELECT 
+		usu.UsuarioID,
+		usu.Nombre,
+		usu.Apellido,
+		SUM(ord.Total) AS total_gastado
+	FROM 
+		Usuarios usu
+	JOIN 
+		Ordenes ord ON usu.UsuarioID = ord.UsuarioID
+	GROUP BY 
+		usu.UsuarioID, usu.Nombre, usu.Apellido
+	ORDER BY 
+		total_gastado DESC
+	LIMIT 5;
+
+
+
+-- 5) ¿Cuántos usuarios han dejado reseñas?
+	SELECT 
+		COUNT(DISTINCT UsuarioID)
+	FROM 
+		public.ReseñasProductos
+	WHERE
+		comentario IS NOT NULL
+-- ===================================== PRODUCTOS Y STOCK =====================================
+-- 1) ¿Qué productos tienen alto stock pero bajas ventas?
+	SELECT 
+		prod.ProductoID,
+		prod.Nombre,
+		prod.Stock,
+		COALESCE(SUM(det_ord.Cantidad), 0) AS TotalVendido
+	FROM 
+		Productos prod
+	LEFT JOIN 
+		DetalleOrdenes det_ord ON prod.ProductoID = det_ord.ProductoID
+	GROUP BY 
+		prod.ProductoID, prod.Nombre, prod.Stock
+	HAVING 
+		prod.Stock > 60 AND COALESCE(SUM(det_ord.Cantidad), 0) < 780
+		-- Valores arbitrarios tomados por mi
+	ORDER BY 
+		TotalVendido DESC;
+
+
+
+-- 2) ¿Cuántos productos están actualmente fuera de stock?
+	-- Opcion 1:
+		select 
+			count(distinct ProductoID) as cant_productos
+		from 
+			public.Productos
+		where 
+			stock = 0
+
+	-- Opcion 2:
+		SELECT 
+			count(distinct carr.ProductoID) as cant_productos,
+		FROM 
+			public.Productos prod
+		RIGHT JOIN
+			public.Carrito carr ON prod.ProductoID = carr.ProductoID
+		WHERE
+			carr.cantidad > prod.Stock
+
+
+
+-- 3) ¿Cuáles son los productos peor calificados?
+	SELECT 
+		prod.ProductoID,
+		prod.Nombre,
+		ROUND(AVG(res.Calificacion),2) AS promedio_calificacion
+	FROM 
+		ReseñasProductos res
+	JOIN 
+		Productos prod ON res.ProductoID = prod.ProductoID
+	GROUP BY 
+		prod.ProductoID, prod.Nombre
+	HAVING 
+		AVG(res.Calificacion) < 3
+	ORDER BY 
+		promedio_calificacion ASC
+	LIMIT 5;
+
+
+
+-- 4) ¿Qué productos tienen mayor cantidad de reseñas?
+	SELECT 
+		prod.ProductoID,
+		prod.Nombre,
+		COUNT(distinct res.comentario) as cant_reseñas
+	FROM 
+		public.reseñasProductos res
+	JOIN 
+		public.productos prod ON res.ProductoID = prod.ProductoID
+	GROUP BY 
+		prod.ProductoID, prod.Nombre
+	ORDER BY 
+		cant_reseñas DESC
+	LIMIT 5;
+
+
+
+-- 5) ¿Qué categoría tiene el mayor valor económico vendido (no solo volumen)?
+	SELECT 
+		c.CategoriaID,
+		c.Nombre AS Categoria,
+		SUM(d.Cantidad * d.PrecioUnitario) AS total_vendido
+	FROM 
+		DetalleOrdenes d
+	JOIN 
+		Productos p ON d.ProductoID = p.ProductoID
+	JOIN 
+		Categorias c ON p.CategoriaID = c.CategoriaID
+	GROUP BY 
+		c.CategoriaID, c.Nombre
+	ORDER BY 
+		total_vendido DESC
+	LIMIT 1;
