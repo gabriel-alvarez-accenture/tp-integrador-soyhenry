@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: stg_direcciones_envio
+    description: "Direcciones de envío registradas por usuarios con ubicación completa"
+    columns:
+      - name: direccion_id
+        tests: [not_null, unique]
+      - name: usuario_id
+        tests: [not_null]
+      - name: calle
+        tests: [not_null]
+      - name: ciudad
+        tests: [not_null]
+      - name: pais
+        tests: [not_null]
