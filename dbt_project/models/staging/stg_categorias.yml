@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: stg_categorias
+    description: "Tabla de categorías con nombre y descripción"
+    columns:
+      - name: CategoriaID
+        tests: [not_null, unique]
+      - name: Nombre
+        tests: [not_null]

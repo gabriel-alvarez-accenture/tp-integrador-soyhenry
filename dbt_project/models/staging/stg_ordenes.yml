@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: stg_ordenes
+    description: "Órdenes realizadas por usuarios con monto total y estado"
+    columns:
+      - name: OrdenID
+        tests: [not_null, unique]
+      - name: UsuarioID
+        tests: [not_null]
+      - name: Total
+        tests: [not_null]
+      - name: Estado
+        tests: [not_null]

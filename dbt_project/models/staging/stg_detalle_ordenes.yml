@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: stg_detalle_ordenes
+    description: "Detalle de cada orden con cantidades y precios unitarios"
+    columns:
+      - name: DetalleID
+        tests: [not_null, unique]
+      - name: OrdenID
+        tests: [not_null]
+      - name: ProductoID
+        tests: [not_null]
+      - name: Cantidad
+        tests: [not_null]
+      - name: PrecioUnitario
+        tests: [not_null]

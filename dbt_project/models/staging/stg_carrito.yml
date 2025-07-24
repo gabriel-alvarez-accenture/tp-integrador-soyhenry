@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: stg_carrito
+    description: "Ítems agregados al carrito por usuario y fecha"
+    columns:
+      - name: CarritoID
+        tests: [not_null, unique]
+      - name: UsuarioID
+        tests: [not_null]
+      - name: ProductoID
+        tests: [not_null]
+      - name: Cantidad
+        tests: [not_null]

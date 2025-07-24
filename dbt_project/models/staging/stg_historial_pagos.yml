@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: stg_historial_pagos
+    description: "Pagos realizados para órdenes, con fecha y estado"
+    columns:
+      - name: PagoID
+        tests: [not_null, unique]
+      - name: OrdenID
+        tests: [not_null]
+      - name: MetodoPagoID
+        tests: [not_null]
+      - name: Monto
+        tests: [not_null]

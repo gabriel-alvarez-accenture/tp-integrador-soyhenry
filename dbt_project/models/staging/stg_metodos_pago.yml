@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: stg_metodos_pago
+    description: "Métodos de pago disponibles en la plataforma"
+    columns:
+      - name: MetodoPagoID
+        tests: [not_null, unique]
+      - name: Nombre
+        tests: [not_null]

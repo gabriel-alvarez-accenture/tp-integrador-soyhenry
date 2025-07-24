@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: stg_productos
+    description: "Productos disponibles con precio, stock y referencia a categoría"
+    columns:
+      - name: ProductoID
+        tests: [not_null, unique]
+      - name: Nombre
+        tests: [not_null]
+      - name: Precio
+        tests: [not_null]
+      - name: Stock
+        tests: [not_null]
+      - name: CategoriaID
+        tests: [not_null]

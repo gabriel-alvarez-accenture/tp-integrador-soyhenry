@@ -4,3 +4,12 @@ sources:
   - name: public
     tables:
       - name: usuarios
+      - name: categorias
+      - name: Productos
+      - name: Ordenes
+      - name: DetalleOrdenes
+      - name: Carrito
+      - name: MetodosPago
+      - name: OrdenesMetodosPago
+      - name: ReseñasProductos
+      - name: HistorialPagos

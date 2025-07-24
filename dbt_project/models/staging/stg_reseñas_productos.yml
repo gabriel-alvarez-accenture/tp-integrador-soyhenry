@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: stg_reseñas_productos
+    description: "Reseñas de usuarios con calificación y comentario para cada producto"
+    columns:
+      - name: ReseñaID
+        tests: [not_null, unique]
+      - name: UsuarioID
+        tests: [not_null]
+      - name: ProductoID
+        tests: [not_null]
+      - name: Calificacion
+        tests: [not_null]

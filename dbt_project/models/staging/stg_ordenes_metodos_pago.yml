@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: stg_ordenes_metodos_pago
+    description: "Relación entre órdenes y métodos de pago con monto abonado"
+    columns:
+      - name: OrdenMetodoID
+        tests: [not_null, unique]
+      - name: OrdenID
+        tests: [not_null]
+      - name: MetodoPagoID
+        tests: [not_null]
+      - name: MontoPagado
+        tests: [not_null]
