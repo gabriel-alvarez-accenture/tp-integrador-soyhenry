@@ -1,0 +1,20 @@
+Se adjunta una imagen de como quedaria el modelo en base a mis propuestas de mejora, algunas
+detalladas en el archivo "Slowly Changing Dimensions (SCDs)". Y otras explicadas a continuacion:
+
+Se agrega una nueva tabla "ProductosCarrito": actualmente en el modelo se tiene que un carrito solo puede 
+tener 1 solo producto, notando esto se me ocurre la mejora de que un carrito pueda tener varios productos, no
+importa si son de distintas categorias, esto podria mejorar el modelo ya que no tendriamos un carrito por 
+producto como para actualmente, se podria reducir significativamente la cantidad de registros en la tabla 
+actual de Carrito.
+La tabla nueva hace que sea mas flexible y escalable, permitiendo que carritos abarquen muchos productos.
+
+Se agrega una nueva tabla "OrdenesMetodoPago": actualmente en el modelo solamente se permite que haya un metodo
+de pago por orden, y se me ocurrió una mejora que hasta podria mejorar la experiencia del cliente: permitirle
+tener varios metodos de pago por orden, podria ponerse un criterio para permitir esta multiplicidad de 
+metodos via un monto minimo a cumplir.
+Con la nueva tabla, permitimos que ordenes puedan tener varios metodos de pago, totalmente escalable para
+afrontar nuevas situaciones que beneficiarian a los clientes.
+
+Colores:
+    Verde --> nuevas tablas (las detalladas en este archivo).
+    Rojo --> tablas modificadas explicadas en el archivo "Slowly Changing Dimensions (SCDs)".
