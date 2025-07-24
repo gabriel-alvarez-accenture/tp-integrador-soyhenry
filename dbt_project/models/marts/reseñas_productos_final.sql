@@ -1,7 +1,7 @@
 SELECT
-  r.reseña_id,
-  r.usuario_id,
-  r.producto_id,
+  r.reseñaid,
+  r.usuarioid,
+  r.productoid,
   INITCAP(p.nombre) AS nombre_producto,
   p.precio,
   r.calificacion,
@@ -9,4 +9,4 @@ SELECT
   r.fecha
 FROM {{ ref('stg_reseñas_productos') }} r
 JOIN {{ ref('stg_productos') }} p
-  ON r.producto_id = p.producto_id
+  ON r.productoid = p.productoid

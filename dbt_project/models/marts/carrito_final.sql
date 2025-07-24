@@ -1,11 +1,11 @@
 SELECT
-  c.carrito_id,
-  c.usuario_id,
-  c.producto_id,
+  c.carritoid,
+  c.usuarioid,
+  c.productoid,
   c.cantidad,
-  c.fecha_agregado,
+  c.fechaagregado,
   p.precio,
   (c.cantidad * p.precio) AS monto_estimado
 FROM {{ ref('stg_carrito') }} c
 JOIN {{ ref('stg_productos') }} p
-  ON c.producto_id = p.producto_id
+  ON c.productoid = p.productoid

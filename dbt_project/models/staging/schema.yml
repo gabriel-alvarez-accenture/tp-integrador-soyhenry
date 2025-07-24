@@ -5,11 +5,12 @@ sources:
     tables:
       - name: usuarios
       - name: categorias
-      - name: Productos
-      - name: Ordenes
-      - name: DetalleOrdenes
-      - name: Carrito
-      - name: MetodosPago
-      - name: OrdenesMetodosPago
-      - name: ReseñasProductos
-      - name: HistorialPagos
+      - name: productos
+      - name: ordenes
+      - name: detalleordenes
+      - name: carrito
+      - name: metodospago
+      - name: ordenesmetodospago
+      - name: reseñasproductos
+      - name: historialpagos
+      - name: direccionesenvio
