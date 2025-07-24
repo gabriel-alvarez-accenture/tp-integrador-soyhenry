@@ -1,0 +1,12 @@
+version: 2
+
+models:
+  - name: stg_usuarios
+    description: "Tabla de usuarios con sus datos principales"
+    columns:
+      - name: UsuarioID
+        tests: [not_null, unique]
+      - name: DNI
+        tests: [not_null, unique]
+      - name: Email
+        tests: [not_null, unique]
