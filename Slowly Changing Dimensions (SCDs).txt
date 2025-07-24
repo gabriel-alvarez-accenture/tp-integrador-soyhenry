@@ -1,0 +1,75 @@
+DireccionesEnvio: 
+    SCD de tipo 1: para que un usuario en caso de tener que editar una direccion de envio, directamente 
+    sobreescriba los valores existentes (calle, provincia, etc), no guardar historial ni valor anterior.
+
+Usuarios:
+    SCD de tipo 1: usuario no deberia cambiar ningun atributo mas que la contraseña o email, se decide 
+    sobreescribir los valores, no guardar historial de estos, dado que no seran muy frecuentes los cambios.
+
+ReseñasProductos:
+    SCD de tipo 1: usuario en caso de querer editar una reseña escrita anteriormente, que sobreescriba tanto
+    la calificacion como el comentario en caso de ser necesario, no se guarda historial. No hay problema con
+    que usuario cambie frecuentemente una reseña.
+
+Carrito:
+    SCD de tipo 1: dado que el carrito es algo muy volatil (se puede cambiar muchas veces tanto la cantidad
+    como el producto), se decide que se sobreescriba, no mantener historial debido a que reduciria 
+    significativamente la performance de las transacciones para persistir la informacion cambiante.
+
+Ordenes:
+    SCD de tipo 2: debido a que en el modelo actual no se sabe en que momento cambio el estado de una orden, 
+    es decir: no se cuenta con una trazabilidad adecuada, el cambio que se propone es rediseñar la tabla 
+    existente para poder tener un historial en la misma tabla:
+        CREATE TABLE Ordenes (
+            OrdenEstadoID INT PRIMARY KEY, -- cada fila representa una transición de estado             
+            OrdenID INT NOT NULL,                      
+            UsuarioID INT NOT NULL,                    
+            Estado VARCHAR(50) NOT NULL,               
+            FechaEstado DATETIME NOT NULL,             
+            Total DECIMAL(10,2) NOT NULL,              
+            CONSTRAINT fk_orden_usuario FOREIGN KEY (UsuarioID) REFERENCES Usuarios(UsuarioID)
+        );
+    Consultar estado actual --> se consulta el último FechaEstado por OrdenID.
+    En realidad la mejor solucion seria crear una tabla nueva a modo de HistorialEstadosOrdenes, seria una
+    SCD de tipo 4, pero la consigna del ejercicio pide que sea SCD 1,2 o 3.
+
+DetalleOrdenes:
+    SCD de tipo 1: sobreescribir sin problemas los campos precio unitario como cantidad.
+
+Productos:
+    SCD de tipo 1: dado que cualquier atributo puede cambiarse en cualquier momento, sobretodo la descripcion
+    como el stock. Sin embargo, reconozco que en un contexto con alta inflacion en la economia tal vez seria
+    util tener un historial de precios de los productos, en ese caso optaria por una SCD de tipo 4, para
+    tener un historial del precio del producto y poder obtener informacion como su evolucion o variacion de
+    precio en el tiempo. No haria ningun cambio en la tabla existente dado que es muy probable que sea 
+    muy consultada frecuentemente, no incorporaria un campo fecha para calcular el valor actual, reduciria
+    mucho la performance y aumentaria los tiempos de espera de la consulta.
+
+Categorias:
+    SCD de tipo 1: no deberia haber muchos cambios en estos valores, pero si es el caso, entonces que los
+    sobreescriba sin problemas.
+
+HistorialPagos:
+    SCD de tipo 2: lo mismo que el caso de la tabla Ordenes, no se tiene una trazabilidad de la evolucion
+    o cambios de estados para una orden, no se sabe en que fecha o momento paso de un estado a otro.
+    Para que haya un historial y se mejore la trazabilidad o auditoria.
+    Nuevo diseño en la tabla:
+    CREATE TABLE HistorialPagos (
+        PagoEstadoID SERIAL PRIMARY KEY,           -- es la PK única por transición
+        PagoID INT NOT NULL,                       -- Identificador del pago, se repite por transición
+        OrdenID INT NOT NULL,                      
+        MetodoPagoID INT NOT NULL,                 
+        EstadoPago VARCHAR(50) NOT NULL,           -- Estado en ese momento (Ej: Procesando, Aprobado)
+        Monto DECIMAL(10,2) NOT NULL,              
+        FechaEstado TIMESTAMP NOT NULL,            -- Fecha de la transición
+        FOREIGN KEY (OrdenID) REFERENCES Ordenes(OrdenID),
+        FOREIGN KEY (MetodoPagoID) REFERENCES MetodosPago(MetodoPagoID)
+    );
+
+OrdenesMetodosPago:
+    SCD de tipo 1: no deberia haber muchos cambios en estos valores, pero si es el caso, entonces que los
+    sobreescriba sin problemas.
+
+MetodosPago:
+    SCD de tipo 1: las filas deberian ser estaticas dado que no se crean tantos metodos de pago como otras 
+    cosas del modelo, asi que en caso de hacer alguna modificacion, que se sobreescriba.
