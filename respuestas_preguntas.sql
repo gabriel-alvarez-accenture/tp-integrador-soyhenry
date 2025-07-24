@@ -1,3 +1,42 @@
+-- Los atributos clave son los que se encuentran en este archivo para responder las preguntas del negocio.
+/* LLAVES PRIMARIAS:
+Tabla					Llave Primaria
+Usuarios				UsuarioID
+Categorias				CategoriaID
+Productos				ProductoID
+Ordenes					OrdenID
+DetalleOrdenes			DetalleID
+DireccionesEnvio		DireccionID
+Carrito					CarritoID
+MetodosPago				MetodoPagoID
+OrdenesMetodosPago		OrdenMetodoID
+ReseñasProductos		ReseñaID
+HistorialPagos			PagoID
+
+LLAVES FORANEAS
+Tabla					Llave Foránea	Referencia a
+Productos				CategoriaID		Categorias(CategoriaID)
+Ordenes					UsuarioID		Usuarios(UsuarioID)
+DetalleOrdenes			OrdenID			Ordenes(OrdenID)
+DetalleOrdenes			ProductoID		Productos(ProductoID)
+DireccionesEnvio		UsuarioID		Usuarios(UsuarioID)
+Carrito					UsuarioID		Usuarios(UsuarioID)
+Carrito					ProductoID		Productos(ProductoID)
+OrdenesMetodosPago		OrdenID			Ordenes(OrdenID)
+OrdenesMetodosPago		MetodoPagoID	MetodosPago(MetodoPagoID)
+ReseñasProductos		UsuarioID		Usuarios(UsuarioID)
+ReseñasProductos		ProductoID		Productos(ProductoID)
+HistorialPagos			OrdenID			Ordenes(OrdenID)
+HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
+*/
+
+
+
+
+
+
+
+
 -- ===================================== VENTAS =====================================
 -- 1) ¿Cuáles son los productos más vendidos por volumen?
 	select 

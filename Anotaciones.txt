@@ -1,0 +1,12 @@
+La examinacion de los datos se realiza en el archivo: 
+    examinacion_datos.sql
+
+El análisis exploratorio, deteccion de inconsistencias y problemas de calidad de los datos se realiza 
+en el archivo:
+    analisis_calidad.ipynb
+
+Todo lo relacionado a la identificacion y analisis de estructuras y relaciones del modelo 
+se realiza en el archivo:
+    respuestas_preguntas.sql
+
+No se encontraron columnas con datos semi-estructurados.
