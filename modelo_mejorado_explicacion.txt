@@ -18,3 +18,11 @@ afrontar nuevas situaciones que beneficiarian a los clientes.
 Colores:
     Verde --> nuevas tablas (las detalladas en este archivo).
     Rojo --> tablas modificadas explicadas en el archivo "Slowly Changing Dimensions (SCDs)".
+
+
+
+
+Otro aspecto a mejorar sobretodo en cuanto a seguridad: es aplicar hash a las contraseñas de los usuarios, 
+actualmente se persiste la contraseña tal cual registró el usuario, esto es muy vulnerable, al aplicar un
+hash se debe persistir la cadena de caracteres generada y mediante un proceso de cifrado y des-cifrado
+poder calcular la contraseña del usuario.
