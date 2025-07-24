@@ -30,12 +30,9 @@ HistorialPagos			OrdenID			Ordenes(OrdenID)
 HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 */
 
-
-
-
-
-
-
+/* ENTREGABLE 2: los datos actuales responden las preguntas del negocio, los hechos y dimensiones se 
+detallan en cada par de pregunta-respuesta.
+*/
 
 -- ===================================== VENTAS =====================================
 -- 1) ¿Cuáles son los productos más vendidos por volumen?
@@ -53,7 +50,14 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 	order by 
 		cant_unidades_vendidas desc
 	limit 5;
+/*
+Hecho (medida): 
+	sum(detord.cantidad) → total de unidades vendidas.
 
+Dimensiones:
+	prod.descripcion (agrupación por producto)
+	ord.estado (filtro: solo órdenes completadas o enviadas)
+*/
 
 
 -- 2) ¿Cuál es el ticket promedio por orden?
@@ -68,7 +72,13 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 		AVG(cantidad * preciounitario) 
 	FROM 
 		public.detalleordenes;
+/*
+Hecho (medida):
+	Opción 1: avg(total) → promedio del total por orden
+	Opción 2: avg(cantidad * preciounitario) → promedio del monto por ítem en todas las órdenes
 
+Dimensiones: En ambos casos, no se usa ninguna, se podrian agregar filtros como fechas o estado de ordenes.
+*/
 
 
 -- 3) ¿Cuáles son las categorías con mayor número de productos vendidos?
@@ -93,7 +103,14 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 	order by 
 		cant_vendida desc
 	limit 5;
+/*
+Hecho (medida): 
+	sum(c.cant_vendida) → total de unidades vendidas por categoría
 
+Dimensiones:
+	cat.nombre (agrupación por categoría)
+	ord.estado (filtro: órdenes completadas o enviadas)
+*/
 
 
 -- 4) ¿Qué día de la semana se generan más ventas?
@@ -114,7 +131,13 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 		dia_semana
 	ORDER BY 
 		cantidad_ordenes DESC;
+/*
+Hecho (medida): 
+	COUNT(*) → cantidad de órdenes generadas por día
 
+Dimensión:
+	Día de la semana (FechaOrden → transformado con TO_CHAR y agrupado como dia_semana)
+*/
 
 
 -- 5) ¿Cuántas órdenes se generan cada mes y cuál es su variación?
@@ -148,6 +171,14 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 		variacion
 	ORDER BY 
 		mes asc;
+/*
+Hechos (medidas):
+	COUNT(*) → cantidad de órdenes por mes
+	Variación porcentual mensual de órdenes (variacion_porcentual)
+
+Dimensión:
+	Fecha (FechaOrden) truncada al mes → agrupación mensual
+*/
 -- ===================================== PAGOS Y TRANSACCIONES =====================================
 -- 1) ¿Cuáles son los métodos de pago más utilizados?
 	select 
@@ -164,7 +195,13 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 	order by 
 		cant_usos desc
 	limit 5;
+/*
+Hecho (medida): 
+	count(*) → cantidad de usos por método de pago
 
+Dimensiones:
+	metpago.nombre y metpago.descripcion (agrupación por método de pago)
+*/
 
 
 -- 2) ¿Cuál es el monto promedio pagado por método de pago?
@@ -179,7 +216,14 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 		hist_pag.estadopago = 'Pagado'
 	GROUP BY 
 		metpago.nombre;
+/*
+Hecho (medida): 
+	AVG(hist_pag.monto) → monto promedio pagado por método de pago
 
+Dimensiones:
+	metpago.nombre (agrupación por método de pago)
+	hist_pag.estadopago = 'Pagado' (filtro: solo pagos confirmados)
+*/
 
 
 -- 3) ¿Cuántas órdenes se pagaron usando más de un método de pago?
@@ -194,7 +238,14 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 		ordenid
 	HAVING
 		COUNT(DISTINCT metodopagoid) > 1
+/*
+Hecho (medida): 
+	COUNT(DISTINCT metodopagoid) → cantidad de métodos de pago por orden
 
+Dimensiones:
+	ordenid (agrupación por orden)
+	estadopago = 'Pagado' (filtro: solo pagos confirmados)
+*/
 
 
 -- 4) ¿Cuántos pagos están en estado 'Procesando' o 'Fallido'?
@@ -204,7 +255,13 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 		public.HistorialPagos
 	WHERE
 		EstadoPago in ('Procesando','Fallido')
+/*
+Hecho (medida): 
+	count(distinct PagoID) → total de pagos únicos en estado no exitoso
 
+Dimensión:
+	EstadoPago (filtro: 'Procesando' o 'Fallido')
+*/
 
 
 -- 5) ¿Cuál es el monto total recaudado por mes?
@@ -217,6 +274,14 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 		EstadoPago = 'Pagado'
 	GROUP BY 
 		DATE_TRUNC('month', FechaPago)
+/*
+Hecho (medida): 
+	SUM(Monto) → monto total recaudado por mes
+
+Dimensiones:
+	FechaPago truncada al mes (DATE_TRUNC('month', FechaPago)) → agrupación temporal
+	EstadoPago = 'Pagado' → filtro por pagos confirmados
+*/
 -- ===================================== USUARIOS =====================================
 -- 1) ¿Cuántos usuarios se registran por mes?
 	SELECT 
@@ -226,20 +291,32 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 		public.usuarios
 	GROUP BY 
 		DATE_TRUNC('month', FechaRegistro);
+/*
+Hecho (medida): 
+	COUNT(*) → cantidad de usuarios registrados por mes
 
+Dimensión:
+	FechaRegistro truncada al mes (DATE_TRUNC('month', FechaRegistro)
+*/
 
 
 -- 2) ¿Cuántos usuarios han realizado más de una orden?
 	SELECT 
-		UsuarioID,
-		COUNT(*) AS cant_ordenes
+		COUNT(DISTINCT UsuarioID)
 	FROM 
 		public.ordenes
 	GROUP BY 
 		UsuarioID
 	HAVING 
 		COUNT(*) > 1;
+/*
+Hecho (medida): 
+	COUNT(DISTINCT UsuarioID) → total de usuarios con más de una orden
 
+Dimensión:
+	UsuarioID (agrupación por usuario)
+	HAVING COUNT(*) > 1 (filtro para incluir solo quienes hicieron más de una orden)
+*/
 
 
 -- 3) ¿Cuántos usuarios registrados no han hecho ninguna compra?
@@ -249,7 +326,13 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 		public.usuarios
 	WHERE
 		UsuarioID NOT IN (SELECT UsuarioID FROM public.ordenes WHERE estado = 'Completado')
+/*
+Hecho (medida): 
+	COUNT(distinct UsuarioID) → cantidad de usuarios sin compras completadas
 
+Dimensión:
+	UsuarioID (filtro: excluir los que hicieron órdenes 'Completado')
+*/
 
 
 -- 4) ¿Qué usuarios han gastado más en total?
@@ -267,7 +350,13 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 	ORDER BY 
 		total_gastado DESC
 	LIMIT 5;
+/*
+Hecho (medida): 
+	SUM(ord.Total) → monto total gastado por usuario
 
+Dimensiones:
+	UsuarioID, Nombre, Apellido → agrupación por usuario
+*/
 
 
 -- 5) ¿Cuántos usuarios han dejado reseñas?
@@ -277,6 +366,14 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 		public.ReseñasProductos
 	WHERE
 		comentario IS NOT NULL
+/*
+Hecho (medida): 
+	COUNT(DISTINCT UsuarioID) → cantidad de usuarios que dejaron una reseña
+
+Dimensión:
+	UsuarioID (agrupación implícita por usuario)
+	Filtro: comentario IS NOT NULL → se considera solo si dejaron un texto
+*/
 -- ===================================== PRODUCTOS Y STOCK =====================================
 -- 1) ¿Qué productos tienen alto stock pero bajas ventas?
 	SELECT 
@@ -295,7 +392,15 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 		-- Valores arbitrarios tomados por mi
 	ORDER BY 
 		TotalVendido DESC;
+/*
+Hechos (medidas):
+	prod.Stock → nivel de stock
+	SUM(det_ord.Cantidad) → cantidad total vendida por producto
 
+Dimensiones:
+	ProductoID, Nombre → agrupación por producto
+	Filtros en HAVING: alto stock (>60) y bajas ventas (<780)
+*/
 
 
 -- 2) ¿Cuántos productos están actualmente fuera de stock?
@@ -316,7 +421,15 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 			public.Carrito carr ON prod.ProductoID = carr.ProductoID
 		WHERE
 			carr.cantidad > prod.Stock
+/*
+Hecho (medida):
+	Opción 1: COUNT(distinct ProductoID) → productos con stock igual a 0
+	Opción 2: COUNT(distinct carr.ProductoID) → productos en carrito con demanda mayor al stock
 
+Dimensión:
+	ProductoID (agrupación implícita por producto)
+	Filtro por condición de stock en cada caso
+*/
 
 
 -- 3) ¿Cuáles son los productos peor calificados?
@@ -335,7 +448,14 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 	ORDER BY 
 		promedio_calificacion ASC
 	LIMIT 5;
+/*
+Hecho (medida): 
+	AVG(res.Calificacion) → promedio de calificación por producto
 
+Dimensiones:
+	ProductoID, Nombre → agrupación por producto
+	Filtro: AVG(res.Calificacion) < 3 → solo productos con baja calificación
+*/
 
 
 -- 4) ¿Qué productos tienen mayor cantidad de reseñas?
@@ -352,7 +472,13 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 	ORDER BY 
 		cant_reseñas DESC
 	LIMIT 5;
+/*
+Hecho (medida): 
+	COUNT(distinct res.comentario) → cantidad de reseñas por producto
 
+Dimensiones:
+	ProductoID, Nombre → agrupación por producto
+*/
 
 
 -- 5) ¿Qué categoría tiene el mayor valor económico vendido (no solo volumen)?
@@ -371,3 +497,10 @@ HistorialPagos			MetodoPagoID	MetodosPago(MetodoPagoID)
 	ORDER BY 
 		total_vendido DESC
 	LIMIT 1;
+/*
+Hecho (medida): 
+	SUM(d.Cantidad * d.PrecioUnitario) → valor económico total vendido por categoría
+
+Dimensiones:
+	CategoriaID, Nombre → agrupación por categoría
+*/
